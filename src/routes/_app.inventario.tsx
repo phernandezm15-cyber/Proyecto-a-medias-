@@ -15,8 +15,9 @@ import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { Barcode } from "@/components/Barcode";
 import { PageSkeleton, TableSkeleton, useDebouncedLoading, useFakeLoading } from "@/components/PageSkeleton";
 import { CATEGORIAS, estadoMed, estadoVariant, fmtFecha, q, type Medicamento } from "@/lib/store";
-import { useData } from "@/lib/db";
+import { useData, useMe } from "@/lib/db";
 import { VoiceButton } from "@/components/VoiceButton";
+import { Lock, ShieldAlert, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/_app/inventario")({
   head: () => ({
@@ -38,6 +39,8 @@ const empty = (): Medicamento => ({ id: "", codigo: "", nombre: "", principio: "
 
 function Inventario() {
   const pageLoading = useFakeLoading();
+  const me = useMe();
+  const isAdmin = !!me?.isAdmin;
   const { meds, saveMed, deleteMed, loading } = useData();
   const [search, setSearch] = useState("");
   const [chip, setChip] = useState<Chip>("todo");
@@ -79,7 +82,59 @@ function Inventario() {
 
   return (
     <div>
-      <PageHeader title="Inventario" subtitle={`${meds.length} medicamentos registrados`} actions={<Button onClick={() => setEditing(empty())}><Plus /> Añadir Nuevo</Button>} />
+      <PageHeader
+        title="Inventario"
+        subtitle={`${meds.length} medicamentos registrados`}
+        actions={
+          isAdmin ? (
+            <Button onClick={() => setEditing(empty())} className="gap-1.5">
+              <Plus /> Añadir Nuevo
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              className="opacity-80 gap-1.5"
+              onClick={() =>
+                toast.info("Función de Administrador", {
+                  description:
+                    "Solo los Administradores con clave autorizada pueden registrar nuevos medicamentos.",
+                })
+              }
+            >
+              <Lock className="h-4 w-4 text-muted-foreground" />
+              <span>Añadir Nuevo (Solo Admin)</span>
+            </Button>
+          )
+        }
+      />
+
+      {/* ROL BANNER */}
+      {!isAdmin ? (
+        <div className="mb-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-3.5 flex items-center justify-between text-xs text-emerald-800 dark:text-emerald-200">
+          <div className="flex items-center gap-2.5">
+            <span className="grid h-6 w-6 place-items-center rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold shrink-0">
+              👤
+            </span>
+            <div>
+              <span className="font-bold">Modo Catálogo de Empleado (Consulta & Venta):</span> Puedes buscar productos por texto o voz, consultar existencias para clientes y revisar caducidades.
+            </div>
+          </div>
+          <Badge variant="outline" className="border-emerald-500/40 text-emerald-700 dark:text-emerald-300 shrink-0 hidden sm:inline-flex">
+            Solo Consulta
+          </Badge>
+        </div>
+      ) : (
+        <div className="mb-4 rounded-2xl border border-primary/30 bg-primary/10 p-3 flex items-center justify-between text-xs text-foreground">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-primary flex items-center gap-1">👑 Modo Administrador Total:</span>
+            <span className="text-muted-foreground">Tienes privilegios completos para dar de alta fármacos, editar precios y eliminar del catálogo.</span>
+          </div>
+          <Badge className="bg-primary/20 text-primary border border-primary/40 shrink-0 hidden sm:inline-flex">
+            Control Total
+          </Badge>
+        </div>
+      )}
+
       <div className="glass rounded-2xl p-5">
         <div className="mb-3 flex flex-col gap-3 sm:flex-row">
           <div className="relative flex-1">
@@ -139,7 +194,7 @@ function Inventario() {
                 <TableHead className="text-right">Precio Venta</TableHead>
                 <TableHead className="text-right">Stock</TableHead>
                 <TableHead>Estado</TableHead>
-                <TableHead className="text-right">Acciones</TableHead>
+                <TableHead className="text-right">{isAdmin ? "Acciones" : "Permiso"}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody className="animate-in fade-in duration-300">
@@ -163,8 +218,26 @@ function Inventario() {
                       </Badge>
                     </TableCell>
                     <TableCell className="whitespace-nowrap text-right">
-                      <Button size="icon" variant="ghost" onClick={() => setEditing(m)} aria-label="Editar"><Pencil /></Button>
-                      <Button size="icon" variant="ghost" className="text-destructive" onClick={() => setToDelete(m)} aria-label="Eliminar"><Trash2 /></Button>
+                      {isAdmin ? (
+                        <>
+                          <Button size="icon" variant="ghost" onClick={() => setEditing(m)} aria-label="Editar"><Pencil /></Button>
+                          <Button size="icon" variant="ghost" className="text-destructive" onClick={() => setToDelete(m)} aria-label="Eliminar"><Trash2 /></Button>
+                        </>
+                      ) : (
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="text-muted-foreground opacity-60 hover:opacity-100"
+                          onClick={() =>
+                            toast.info("Función de Administrador", {
+                              description: "Solo los Administradores pueden editar precios o dar de baja medicamentos.",
+                            })
+                          }
+                          aria-label="Solo Administrador"
+                        >
+                          <Lock className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
                     </TableCell>
                   </TableRow>
                 );

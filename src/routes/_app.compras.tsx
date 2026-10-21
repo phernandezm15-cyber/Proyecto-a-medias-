@@ -12,8 +12,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { PageHeader } from "@/components/PageHeader";
 import { PageSkeleton, useFakeLoading } from "@/components/PageSkeleton";
 import { fmtFechaHora, q, type Compra, type EstadoCompra } from "@/lib/store";
-import { useData } from "@/lib/db";
+import { useData, useMe } from "@/lib/db";
 import { suggestedSupplier } from "@/lib/insights";
+import { Lock } from "lucide-react";
 
 export const Route = createFileRoute("/_app/compras")({
   head: () => ({
@@ -29,6 +30,8 @@ export const Route = createFileRoute("/_app/compras")({
 
 function Compras() {
   const loading = useFakeLoading();
+  const me = useMe();
+  const isAdmin = !!me?.isAdmin;
   const { meds, proveedores, compras, registrarCompra, recibirCompra, loading: dbLoading } = useData();
   const [prov, setProv] = useState("");
   const [med, setMed] = useState("");
@@ -71,7 +74,35 @@ function Compras() {
 
   return (
     <div>
-      <PageHeader title="Compras" subtitle="Ingreso de mercadería al inventario" />
+      <PageHeader title="Compras & Reabastecimiento" subtitle="Ingreso de mercadería al inventario de la farmacia" />
+
+      {/* ROL BANNER */}
+      {!isAdmin ? (
+        <div className="mb-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-3.5 flex items-center justify-between text-xs text-emerald-800 dark:text-emerald-200">
+          <div className="flex items-center gap-2.5">
+            <span className="grid h-6 w-6 place-items-center rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold shrink-0">
+              👤
+            </span>
+            <div>
+              <span className="font-bold">Vista de Consulta (Empleado):</span> Puedes consultar las compras pendientes y entregas. El registro de nuevas órdenes y costos confidenciales a droguerías está reservado para la Administración.
+            </div>
+          </div>
+          <Badge variant="outline" className="border-emerald-500/40 text-emerald-700 dark:text-emerald-300 shrink-0 hidden sm:inline-flex">
+            Solo Consulta
+          </Badge>
+        </div>
+      ) : (
+        <div className="mb-4 rounded-2xl border border-primary/30 bg-primary/10 p-3 flex items-center justify-between text-xs text-foreground">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-primary flex items-center gap-1">👑 Modo Administrador:</span>
+            <span className="text-muted-foreground">Emisión de órdenes de compra, control de costos unitarios y recepción directa de mercadería.</span>
+          </div>
+          <Badge className="bg-primary/20 text-primary border border-primary/40 shrink-0 hidden sm:inline-flex">
+            Gestión de Compras
+          </Badge>
+        </div>
+      )}
+
       <div className="grid gap-6 lg:grid-cols-[400px_minmax(0,1fr)]">
         <form onSubmit={submit} className="glass h-fit space-y-4 rounded-2xl p-5">
           <h2 className="flex items-center gap-2 text-lg font-bold"><PackagePlus className="h-5 w-5 text-primary" /> Registrar ingreso</h2>
@@ -108,7 +139,24 @@ function Compras() {
           {Number(cant) > 0 && Number(costo) > 0 && (
             <p className="text-sm text-muted-foreground">Total compra: <span className="font-bold text-foreground">{q(Number(cant) * Number(costo))}</span></p>
           )}
-          <Button type="submit" variant="success" className="w-full">Registrar compra</Button>
+
+          {isAdmin ? (
+            <Button type="submit" variant="success" className="w-full">Registrar compra</Button>
+          ) : (
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full opacity-80 gap-1.5"
+              onClick={() =>
+                toast.info("Función de Administrador", {
+                  description: "Solo los Administradores pueden registrar nuevas compras a proveedores.",
+                })
+              }
+            >
+              <Lock className="h-4 w-4 text-muted-foreground" />
+              <span>Registrar Compra (Solo Admin)</span>
+            </Button>
+          )}
         </form>
 
         <div className="glass rounded-2xl p-5">

@@ -13,8 +13,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { PageHeader } from "@/components/PageHeader";
 import { PageSkeleton, TableSkeleton, useDebouncedLoading, useFakeLoading } from "@/components/PageSkeleton";
 import { estadoMed, fmtFecha, fmtFechaHora, q } from "@/lib/store";
-import { useData } from "@/lib/db";
+import { useData, useMe } from "@/lib/db";
 import { exportCSV, exportPDF, exportXLSX, type Sheet } from "@/lib/export";
+import { Badge } from "@/components/ui/badge";
+import { Lock, ShieldAlert } from "lucide-react";
 
 export const Route = createFileRoute("/_app/reportes")({
   head: () => ({
@@ -32,6 +34,8 @@ type Tipo = "ventas" | "inventario";
 
 function Reportes() {
   const loading = useFakeLoading();
+  const me = useMe();
+  const isAdmin = !!me?.isAdmin;
   const { ventas, meds, loading: dbLoading } = useData();
   const [tipo, setTipo] = useState<Tipo>("ventas");
   const [range, setRange] = useState<DateRange | undefined>({ from: startOfMonth(new Date()), to: new Date() });
@@ -91,23 +95,72 @@ function Reportes() {
   return (
     <div>
       <PageHeader
-        title="Reportes"
-        subtitle={tipo === "ventas" ? `${ventasF.length} ventas · Total ${q(totalV)}` : `${medsF.length} productos · Valor ${q(valorInv)}`}
+        title={isAdmin ? "Reportes Financieros & Ventas" : "Corte de Turno & Arqueo de Ventas"}
+        subtitle={
+          tipo === "ventas"
+            ? `${ventasF.length} ventas en rango · Total ${q(totalV)}`
+            : `${medsF.length} productos · Valor ${q(valorInv)}`
+        }
         actions={
           <>
-            <Button variant="destructive" size="lg" className="hover:-translate-y-0.5" onClick={() => run(() => exportPDF(`Reporte de ${sheet().name} — FarmaciaDB`, [sheet()], file), "PDF")}><FileText /> Exportar PDF</Button>
-            <Button variant="success" size="lg" onClick={() => run(() => exportXLSX([sheet()], file), "Excel")}><FileSpreadsheet /> Exportar Excel</Button>
-            <Button size="lg" onClick={() => run(() => exportCSV([sheet()], file), "CSV")}><FileDown /> Exportar CSV</Button>
+            <Button
+              variant="destructive"
+              size="lg"
+              className="hover:-translate-y-0.5"
+              onClick={() => run(() => exportPDF(`Reporte de ${sheet().name} — FarmaciaDB`, [sheet()], file), "PDF")}
+            >
+              <FileText /> Exportar PDF
+            </Button>
+            <Button variant="success" size="lg" onClick={() => run(() => exportXLSX([sheet()], file), "Excel")}>
+              <FileSpreadsheet /> Exportar Excel
+            </Button>
+            <Button size="lg" onClick={() => run(() => exportCSV([sheet()], file), "CSV")}>
+              <FileDown /> Exportar CSV
+            </Button>
           </>
         }
       />
+
+      {/* ROL BANNER */}
+      {!isAdmin ? (
+        <div className="mb-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-3.5 flex items-center justify-between text-xs text-emerald-800 dark:text-emerald-200">
+          <div className="flex items-center gap-2.5">
+            <span className="grid h-6 w-6 place-items-center rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold shrink-0">
+              👤
+            </span>
+            <div>
+              <span className="font-bold">Vista de Empleado (Corte de Turno):</span> Consulta de ventas y recaudación para arqueo de caja. Los balances generales y costos de compras al mayoreo están reservados para la Administración.
+            </div>
+          </div>
+          <Badge variant="outline" className="border-emerald-500/40 text-emerald-700 dark:text-emerald-300 shrink-0 hidden sm:inline-flex">
+            Corte de Turno
+          </Badge>
+        </div>
+      ) : (
+        <div className="mb-4 rounded-2xl border border-primary/30 bg-primary/10 p-3 flex items-center justify-between text-xs text-foreground">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-primary flex items-center gap-1">👑 Modo Administrador Total:</span>
+            <span className="text-muted-foreground">Acceso irrestricto a balances financieros, costo valorizado de inventario y exportaciones oficiales.</span>
+          </div>
+          <Badge className="bg-primary/20 text-primary border border-primary/40 shrink-0 hidden sm:inline-flex">
+            Acceso Financiero Total
+          </Badge>
+        </div>
+      )}
+
       <div className="glass rounded-2xl p-5">
         <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center">
           <Select value={tipo} onValueChange={(v) => setTipo(v as Tipo)}>
-            <SelectTrigger className="lg:w-52"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="lg:w-56"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="ventas">Reporte de Ventas</SelectItem>
-              <SelectItem value="inventario">Reporte de Inventario</SelectItem>
+              {isAdmin ? (
+                <SelectItem value="inventario">Reporte de Inventario (Costos)</SelectItem>
+              ) : (
+                <SelectItem value="inventario" disabled>
+                  🔒 Reporte de Inventario (Solo Admin)
+                </SelectItem>
+              )}
             </SelectContent>
           </Select>
           <Popover>

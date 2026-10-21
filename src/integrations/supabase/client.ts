@@ -260,7 +260,7 @@ class MockSupabaseClient {
       data = getStore(key, []);
     } else if (tableName === 'profiles') {
       const users = getStore('users', INITIAL_USERS);
-      data = users.map((u) => ({ id: u.id, nombre: u.nombre }));
+      data = users.map((u) => ({ id: u.id, nombre: u.nombre, email: u.email, role: u.role, created_at: u.created_at || '2026-01-01' }));
     } else if (tableName === 'user_roles') {
       const users = getStore('users', INITIAL_USERS);
       data = users.map((u) => ({ user_id: u.id, role: u.role }));

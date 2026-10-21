@@ -558,6 +558,137 @@ export function generateExpertPharmacyReply(message: string, context: FarmaciaCo
       `💡 Tomar 1 tableta al día preferentemente a la misma hora.`
     );
   }
+  // Dolor muscular, espalda, articulaciones, golpes
+  if (q.includes("muscular") || q.includes("espalda") || q.includes("articul") || q.includes("golpe") || q.includes("cuello") || q.includes("lumbar") || q.includes("torcedura")) {
+    const voltaren = getMed("voltaren");
+    const advil = getMed("advil");
+
+    return (
+      `🩺 **Recomendación para Dolor Muscular e Inflamación:**\n\n` +
+      `Opciones terapéuticas de rápida absorción en FarmaciaDB:\n\n` +
+      (voltaren
+        ? `1. **${voltaren.nombre}** (${voltaren.principio}):\n` +
+          `   • Potente antiinflamatorio analgésico de rescate para contracturas, lumbalgia y dolor articular agudo.\n` +
+          `   • Stock disponible: ${voltaren.stock} uds. | Precio: Q ${Number(voltaren.precioVenta).toFixed(2)}\n\n`
+        : "") +
+      (advil
+        ? `2. **${advil.nombre}** (${advil.principio}):\n` +
+          `   • Eficaz para dolor de golpes, torceduras e inflamación muscular general.\n` +
+          `   • Stock disponible: ${advil.stock} uds. | Precio: Q ${Number(advil.precioVenta).toFixed(2)}\n\n`
+        : "") +
+      `💡 Aplicar compresas de hielo las primeras 48 horas tras un golpe, y luego calor tibio para relajar los músculos.`
+    );
+  }
+
+  // Piel, raspaduras, quemaduras leves, heridas o dermatitis
+  if (q.includes("piel") || q.includes("quemadur") || q.includes("herida") || q.includes("raspon") || q.includes("cicatriz") || q.includes("irritacion") || q.includes("dermatit")) {
+    const bepanthen = getMed("bepanthen");
+    const fucidin = getMed("fucidin");
+
+    return (
+      `🩺 **Cuidado Dermatológico para Heridas, Quemaduras y Piel:**\n\n` +
+      (bepanthen
+        ? `• **Para regeneración y quemaduras leves:**\n` +
+          `  - **${bepanthen.nombre}** (${bepanthen.principio}): Estimula la cicatrización natural y alivia irritaciones o rozaduras (Stock: ${bepanthen.stock} uds, Q${bepanthen.precioVenta}).\n\n`
+        : "") +
+      (fucidin
+        ? `• **Si la herida tiene pus o sospecha de infección bacteriana:**\n` +
+          `  - **${fucidin.nombre}** (${fucidin.principio}): Antibiótico tópico altamente eficaz contra estafilococos en la piel (Stock: ${fucidin.stock} uds, Q${fucidin.precioVenta}).\n\n`
+        : "") +
+      `💧 Lavar siempre la herida con abundante agua limpia y jabón neutro antes de aplicar cualquier crema.`
+    );
+  }
+
+  // Infección urinaria / cistitis / ardor al orinar
+  if (q.includes("orina") || q.includes("urinari") || q.includes("cistit") || q.includes("ardor al orinar")) {
+    const cipro = getMed("cipro");
+    return (
+      `🩺 **Orientación para Infección Urinaria (Cistitis):**\n\n` +
+      `El ardor miccional y ganas frecuentes de orinar suelen indicar infección en vías urinarias bajas:\n\n` +
+      (cipro
+        ? `• **Tratamiento antibacteriano en FarmaciaDB:**\n` +
+          `  - **${cipro.nombre}** (${cipro.principio}): Antibiótico quinolónico de amplio espectro para vías urinarias (Stock: ${cipro.stock} uds, Q${cipro.precioVenta}).\n` +
+          `  - 🛑 *Requiere prescripción médica obligatoria y cultivo si es recurrente.*\n\n`
+        : "") +
+      `💧 **Medida inmediata:** Beber entre 2 y 3 litros de agua al día para ayudar a limpiar la vejiga mecánicamente.`
+    );
+  }
+
+  // Cólicos menstruales / dismenorrea
+  if (q.includes("menstru") || q.includes("periodo") || q.includes("colico")) {
+    const advil = getMed("advil");
+    const panadol = getMed("panadol");
+    return (
+      `🩺 **Alivio para Cólicos Menstruales:**\n\n` +
+      `Los cólicos ocurren por liberación de prostaglandinas en el útero:\n\n` +
+      (advil
+        ? `1. **${advil.nombre}** (${advil.principio}):\n` +
+          `   • Fármaco de primera línea porque inhibe directamente la síntesis de prostaglandinas que causan las contracciones uterinas.\n` +
+          `   • Tomar 400mg con alimentos al inicio de la molestia (Stock: ${advil.stock} uds, Q${advil.precioVenta}).\n\n`
+        : "") +
+      (panadol
+        ? `2. **${panadol.nombre}** (${panadol.principio}): Opción analgésica alternativa si el paciente no tolera los AINEs o tiene gastritis (Stock: ${panadol.stock} uds, Q${panadol.precioVenta}).\n\n`
+        : "") +
+      `☕ Aplicar una bolsa térmica tibia en el bajo vientre para aliviar la tensión.`
+    );
+  }
+
+  // Vitaminas, fatiga, cansancio
+  if (q.includes("vitamina") || q.includes("cansancio") || q.includes("fatiga") || q.includes("energia") || q.includes("rendimiento")) {
+    const centrum = getMed("centrum");
+    const redoxon = getMed("redoxon");
+    return (
+      `💊 **Suplementación Vitamínica y Energía en FarmaciaDB:**\n\n` +
+      (centrum
+        ? `• **${centrum.nombre}** (${centrum.principio}):\n` +
+          `  - Multivitamínico y multimineral completo de la A al Zinc. Ideal para agotamiento físico y mental en adultos.\n` +
+          `  - Dosis: 1 tableta al día con el desayuno (Stock: ${centrum.stock} uds, Q${centrum.precioVenta}).\n\n`
+        : "") +
+      (redoxon
+        ? `• **${redoxon.nombre}** (${redoxon.principio}):\n` +
+          `  - Vitamina C 1g efervescente: refuerza el sistema inmunológico y acción antioxidante (Stock: ${redoxon.stock} uds, Q${redoxon.precioVenta}).\n\n`
+        : "") +
+      `💡 Asegurar una alimentación balanceada y al menos 7 a 8 horas de sueño continuo.`
+    );
+  }
+
+  // Respiratorio, asma, broncoespasmo
+  if (q.includes("asma") || q.includes("inhalador") || q.includes("pecho cerrado") || q.includes("bronqu") || q.includes("respirar")) {
+    const ventolin = getMed("ventolin");
+    return (
+      `🩺 **Manejo Respiratorio y Broncoespasmo:**\n\n` +
+      (ventolin
+        ? `• **${ventolin.nombre}** (${ventolin.principio}):\n` +
+          `  - Broncodilatador de acción rápida para aliviar la sensación de pecho cerrado, sibilancias o crisis de asma.\n` +
+          `  - Dosis: 1 a 2 inhalaciones según indicación médica.\n` +
+          `  - Stock disponible: ${ventolin.stock} uds. | Precio: Q ${Number(ventolin.precioVenta).toFixed(2)}\n\n`
+        : "") +
+      `⚠️ Si la dificultad para respirar no cede con el inhalador, trasladar de inmediato a un centro de urgencias.`
+    );
+  }
+
+  // Interacción Paracetamol + Ibuprofeno
+  if ((q.includes("paracetamol") && q.includes("ibuprofeno")) || (q.includes("panadol") && q.includes("advil"))) {
+    return (
+      `🩺 **¿Se puede tomar Paracetamol junto con Ibuprofeno?**\n\n` +
+      `**Sí, es una combinación segura si se realiza correctamente:**\n\n` +
+      `• **Mecanismos complementarios:** El Paracetamol actúa a nivel central (cerebro) como analgésico y antipirético, mientras que el Ibuprofeno actúa periféricamente desinflamando la zona afectada.\n` +
+      `• **Pauta de alternancia recomendada:** En dolores intensos o fiebre persistente, se pueden alternar cada 4 horas (ej: Paracetamol a las 8:00, Ibuprofeno a las 12:00, Paracetamol a las 16:00).\n` +
+      `• 🛑 **Regla de oro:** No sobrepasar la dosis máxima diaria de cada uno (4g para Paracetamol, 1200mg para Ibuprofeno sin supervisión médica).\n` +
+      `• Tomar el Ibuprofeno siempre con comida para proteger el estómago.`
+    );
+  }
+
+  // Insomnio / dormir
+  if (q.includes("dormir") || q.includes("insomnio") || q.includes("desvelo")) {
+    return (
+      `🩺 **Orientación para el Insomnio y Dificultad para Conciliar el Sueño:**\n\n` +
+      `1. **Higiene del sueño:** Evitar pantallas (celulares, TV) 1 hora antes de acostarse; mantener el cuarto oscuro y ventilado.\n` +
+      `2. **Evitar estimulantes:** No consumir café, té negro ni refrescos de cola después de las 4:00 PM.\n` +
+      `3. **Infusiones naturales:** Manzanilla, tilo o valeriana ayudan a relajar el sistema nervioso central.\n` +
+      `⚠️ Los medicamentos sedantes o hipnóticos requieren prescripción médica estricta para evitar dependencia o tolerancia.`
+    );
+  }
 
   // -------------------------------------------------------------
   // 4. BÚSQUEDA Y MONOGRAFÍA DETALLADA DE CUALQUIER MEDICAMENTO

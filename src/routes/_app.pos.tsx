@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { PageHeader } from "@/components/PageHeader";
 import { PageSkeleton, useFakeLoading } from "@/components/PageSkeleton";
 import { q, calcTotals, IVA_RATE, fmtFechaHora, puntosPor, useUI, type VentaItem } from "@/lib/store";
-import { useData } from "@/lib/db";
+import { useData, useMe } from "@/lib/db";
 import { playSuccess } from "@/lib/sound";
 import { VoiceButton } from "@/components/VoiceButton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -31,6 +31,7 @@ interface Recibo { id: string; fecha: string; vendedor: string; items: VentaItem
 
 function POS() {
   const loading = useFakeLoading();
+  const me = useMe();
   const { meds, clientes, registrarVenta, vendiendo, loading: dbLoading } = useData();
   const focus = useUI((s) => s.focus);
   const setFocus = useUI((s) => s.setFocus);
@@ -153,12 +154,20 @@ function POS() {
         title="Punto de Venta"
         subtitle="Busca, escanea y cobra en segundos"
         actions={
-          <>
-          <Button variant={focus ? "default" : "outline"} size="sm" onClick={() => setFocus(!focus)}><Maximize2 /> {focus ? "Salir de Modo Enfoque" : "Modo Enfoque"}</Button>
-          <span className="inline-flex items-center gap-2 rounded-full border bg-card/60 px-3 py-1.5 text-xs text-muted-foreground">
-            <Keyboard className="h-3.5 w-3.5" /> Presiona <kbd className="rounded border bg-muted px-1.5 font-mono">Ctrl</kbd>+<kbd className="rounded border bg-muted px-1.5 font-mono">K</kbd> para buscar
-          </span>
-          </>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full border bg-card/80 px-3 py-1 text-xs font-semibold">
+              <span>{me?.isAdmin ? "👑" : "👤"}</span>
+              <span className="text-muted-foreground">Cajero:</span>
+              <span className="text-foreground">{me?.nombre || "Usuario"}</span>
+              <span className="text-[10px] text-primary">({me?.rol || "Empleado"})</span>
+            </span>
+            <Button variant={focus ? "default" : "outline"} size="sm" onClick={() => setFocus(!focus)}>
+              <Maximize2 /> {focus ? "Salir de Modo Enfoque" : "Modo Enfoque"}
+            </Button>
+            <span className="hidden sm:inline-flex items-center gap-2 rounded-full border bg-card/60 px-3 py-1 text-xs text-muted-foreground">
+              <Keyboard className="h-3.5 w-3.5" /> <kbd className="rounded border bg-muted px-1.5 font-mono">Ctrl+K</kbd>
+            </span>
+          </div>
         }
       />
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_440px]">
