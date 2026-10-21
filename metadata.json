@@ -1,0 +1,8 @@
+{
+  "name": "Proyecto Web Studio",
+  "description": "Espacio de trabajo para continuar, migrar y construir proyectos modernos desde Lovable con React y Tailwind CSS.",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
